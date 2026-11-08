@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RIHLA SHOP — Admin</title>
+
+    <style>
+        body {
+            margin: 0;
+            padding: 30px;
+            background: #101010;
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+
+        .box {
+            max-width: 700px;
+            margin: 30px auto;
+            padding: 25px;
+            background: #1d1d1d;
+            border-radius: 15px;
+        }
+
+        h1 { color: #00d4ff; }
+
+        input, button {
+            width: 100%;
+            padding: 13px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 8px;
+            box-sizing: border-box;
+        }
+
+        button {
+            background: #00d4ff;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .product {
+            background: #292929;
+            padding: 15px;
+            margin-top: 15px;
+            border-radius: 10px;
+        }
+
+        .product img {
+            width: 100px;
+            display: block;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="box">
+    <h1>RIHLA SHOP</h1>
+    <h2>Admin panel</h2>
+
+    <h3>Mahsulot qo‘shish</h3>
+
+    <form id="productForm">
+        <input id="name" placeholder="Mahsulot nomi" required>
+        <input id="price" type="number" placeholder="Narxi (UZS)" required>
+        <input type="file" id="imageFile" accept="image/*">
+        <input id="image" placeholder="Rasm URL manzili">
+
+        <button type="submit">Mahsulot qo‘shish</button>
+    </form>
+
+    <p id="status"></p>
+
+    <h2>Mahsulotlar ro‘yxati</h2>
+    <div id="products"></div>
+</div>
+
+<script>
+    const form = document.getElementById("productForm");
+
+    async function loadProducts() {
+        const response = await fetch("/admin/products");
+        const products = await response.json();
+
+        const container = document.getElementById("products");
+        container.innerHTML = "";
+
+        products.forEach(product => {
+            const item = document.createElement("div");
+            item.className = "product";
+
+            const title = document.createElement("h3");
+            title.textContent = product.name;
+
+            const price = document.createElement("p");
+            price.textContent = Number(product.price).toLocaleString("uz-UZ") + " UZS";
+
+            const img = document.createElement("img");
+            img.src = product.image;
+
+            item.append(img, title, price);
+
+            const editBtn = document.createElement("button");
+editBtn.textContent = "Narxni o‘zgartirish";
+
+editBtn.onclick = async () => {
+    const newPrice = prompt("Yangi narxni kiriting:", product.price);
+
+    if (!newPrice || Number(newPrice) <= 0) return;
+
+    const response = await fetch(`/admin/products/${product.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ price: Number(newPrice) })
+    });
+
+    const result = await response.json();
+    alert(result.message || "Xatolik yuz berdi");
+    loadProducts();
+};
+
+const deleteBtn = document.createElement("button");
+deleteBtn.textContent = "Mahsulotni o‘chirish";
+
+deleteBtn.onclick = async () => {
+    if (!confirm("Mahsulotni o‘chirmoqchimisiz?")) return;
+
+    const response = await fetch(`/admin/products/${product.id}`, {
+        method: "DELETE"
+    });
+
+    const result = await response.json();
+    alert(result.message || "Xatolik yuz berdi");
+    loadProducts();
+};
+
+item.append(editBtn, deleteBtn);
+
+            container.appendChild(item);
+        });
+    }
+
+    form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const file = document.getElementById("imageFile").files[0];
+let imageUrl = document.getElementById("image").value;
+
+if (file) {
+    const formData = new FormData();
+    formData.append("image", file);
+
+    const uploadResponse = await fetch("/admin/upload", {
+        method: "POST",
+        body: formData
+    });
+
+    const uploadResult = await uploadResponse.json();
+
+    if (!uploadResult.success) {
+        alert("Rasm yuklanmadi!");
+        return;
+    }
+
+    imageUrl = uploadResult.image;
+}
+
+const product = {
+    name: document.getElementById("name").value,
+    price: document.getElementById("price").value,
+    image: imageUrl
+};
+
+        const response = await fetch("/admin/products", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(product)
+        });
+
+        const result = await response.json();
+
+        document.getElementById("status").textContent = result.message;
+
+        if (result.success) {
+            form.reset();
+            loadProducts();
+        }
+    });
+
+    loadProducts();
+</script>
+
+</body>
+</html>
