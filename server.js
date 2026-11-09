@@ -188,10 +188,34 @@ app.delete("/admin/products/:id", adminAuth, (req, res) => {
     res.json({ success: true, message: "Mahsulot o'chirildi!" });
 });
 
+app.post("/admin/upload", adminAuth, upload.single("image"), (req, res) => {
+    if (!req.file) {
+        return res.status(400).json({
+            success: false,
+            message: "Rasm tanlanmadi"
+        });
+    }
+
+    res.json({
+        success: true,
+        image: "/uploads/" + req.file.filename
+    });
+});
+
 app.get("/admin", adminAuth, (req, res) => {
     res.sendFile(__dirname + "/admin.html");
 });
 
-app.listen(3000, () => {
-  console.log("Sayt ishlayapti: http://localhost:3000");
+app.get("/", (req, res) => {
+    res.sendFile(path.join(__dirname, "internetdokon.html"));
+});
+
+app.get("/internetdokon.html", (req, res) => {
+    res.sendFile(path.join(__dirname, "internetdokon.html"));
+});
+
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, () => {
+        console.log("Sayt ishlayapti: http://localhost:" + PORT);
 });
