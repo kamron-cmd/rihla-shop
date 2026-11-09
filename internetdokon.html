@@ -200,7 +200,16 @@
 <form id="orderForm">
 <h2>Buyurtma qoldirish</h2>
 <label>Ism va familiya<input name="name" autocomplete="name" required minlength="2" maxlength="80" placeholder="Ismingiz"></label>
-<label>Telefon raqami<input name="phone" type="tel" autocomplete="tel" required pattern="[+0-9 ()-]{7,20}" maxlength="20" placeholder="+998 90 123 45 67"></label>
+<label>Telefon raqami
+<input
+  name="phone"
+  type="tel"
+  autocomplete="off"
+  required
+  onpaste="return false"
+  oninput="this.value = this.value.replace(/[^0-9+]/g, '').replace(/(?!^)\+/g, '')"
+>
+</label>
 <label>Yetkazib berish manzili<input name="address" autocomplete="street-address" required minlength="5" maxlength="300" placeholder="Shahar, ko‘cha va uy"></label>
 <label>Mahsulot yoki savolingiz<textarea name="message" required minlength="2" maxlength="1500" placeholder="Masalan: Mono stol chirog‘i, 1 dona"></textarea></label>
 <label class="consent"><input type="checkbox" required><span>Buyurtma bilan bog‘lanish uchun ma’lumotlarim do‘kon egasiga Telegram orqali yuborilishiga roziman.</span></label>
