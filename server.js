@@ -123,6 +123,10 @@ app.get("/admin/products", adminAuth, (req, res) => {
     res.json(getProducts());
 });
 
+app.get("/products", (req, res) => {
+    res.json(getProducts());
+});
+
 app.post("/admin/products", adminAuth, (req, res) => {
     const { name, price, image } = req.body;
 
